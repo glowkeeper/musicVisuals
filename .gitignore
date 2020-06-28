@@ -1,0 +1,10 @@
+src/collegeCampus/*.log
+src/collegeCampus/.awcache
+src/collegeCampus/.awcache/*
+src/collegeCampus/node_modules
+src/collegeCampus/node_modules/*
+src/collegeCampus/src/components/blockchain/typechain
+src/collegeCampus/src/components/blockchain/typechain/*
+src/collegeCampus/build
+src/collegeCampus/build/*
+src/collegeCampus/nohup.out
