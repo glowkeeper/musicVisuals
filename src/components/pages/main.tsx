@@ -59,19 +59,19 @@ export const Main = () => {
       var doDraw = () => {
 
         drawVisual = requestAnimationFrame(doDraw)
-        analyser.getByteFrequencyData(dataArray)
-        console.log(dataArray)
+        analyser.getByteFrequencyData(dataArray)        
+        canvasCtx.fillStyle = 'rgb(200, 200, 200)'
+        canvasCtx.fillRect(0, 0, width, height)
 
-        //var barWidth = (width / bufferLength) * 2.5;
-        var barWidth = (width / bufferLength)
+        var barWidth = (width / bufferLength) * 2.5
         var barHeight
         var x = 0
 
         for(var i = 0; i < bufferLength; i++) {
-          barHeight = dataArray[i]
+          barHeight = dataArray[i] /2
           //console.log(barHeight)
           canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)'
-          canvasCtx.fillRect(x, height-barHeight/200, barWidth, barHeight/200)
+          canvasCtx.fillRect(x, height-barHeight/2, barWidth, barHeight)
 
           x += barWidth + 1
         }
@@ -125,7 +125,7 @@ export const Main = () => {
             audioCtx.decodeAudioData(audioData, function(buffer: any) {
 
                 source.buffer = buffer as AudioBuffer
-                source.connect(audioCtx.destination)
+                source.connect(analyser)
                 analyser.connect(audioCtx.destination)
                 draw()
 
