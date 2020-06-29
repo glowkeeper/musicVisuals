@@ -20,13 +20,15 @@ export const Main = () => {
 
     let analyser = audioCtx.createAnalyser()
     analyser.fftSize = 256
+    analyser.minDecibels = -90
+    analyser.maxDecibels = -10
+    //analyser.smoothingTimeConstant = 0.85*/
     const bufferLength = analyser.frequencyBinCount
-    let dataArray = new Uint8Array(bufferLength)
 
     let source: any
 
     var width = Math.max(960, innerWidth),
-        height = Math.max(500, innerHeight);
+        height = Math.max(500, innerHeight)
 
     /*var x1 = width / 2,
         y1 = height / 2,
@@ -44,52 +46,35 @@ export const Main = () => {
         if ( ref !== null ) {
 
             canvasCtx = ref.getContext("2d")
-            canvasCtx.fillStyle = 'rgb(200, 200, 200)';
-            canvasCtx.fillRect(0, 0, width, height);
-            canvasCtx.lineWidth = 2;
-            canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
-            canvasCtx.beginPath();
+            canvasCtx.fillStyle = 'rgb(200, 200, 200)'
+            canvasCtx.fillRect(0, 0, width, height)
 
         }
     }
 
     const draw = () => {
 
-      //console.log("here!")
+      let dataArray = new Uint8Array(bufferLength)
 
       var doDraw = () => {
 
+        drawVisual = requestAnimationFrame(doDraw)
+        analyser.getByteFrequencyData(dataArray)
+        console.log(dataArray)
 
-          drawVisual = requestAnimationFrame(draw);
+        //var barWidth = (width / bufferLength) * 2.5;
+        var barWidth = (width / bufferLength)
+        var barHeight
+        var x = 0
 
-          analyser.getByteTimeDomainData(dataArray)
+        for(var i = 0; i < bufferLength; i++) {
+          barHeight = dataArray[i]
+          //console.log(barHeight)
+          canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)'
+          canvasCtx.fillRect(x, height-barHeight/200, barWidth, barHeight/200)
 
-          var sliceWidth = width * 1.0 / bufferLength;
-          var x = 0;
-
-          //console.log(bufferLength)
-
-          for(var i = 0; i < bufferLength; i++) {
-
-            //console.log("buffer length: ", dataArray[i] )
-
-            var v = dataArray[i] / 128.0;
-            var y = v * height/2;
-
-            if(i === 0) {
-              //console.log("also I am, ", x,y)
-              canvasCtx.moveTo(x, y);
-            } else {
-              //console.log("here I am, ", x,y)
-              canvasCtx.lineTo(x, y);
-            }
-
-            x += sliceWidth;
-          }
-
-          canvasCtx.lineTo(width, height/2);
-          canvasCtx.stroke();
-
+          x += barWidth + 1
+        }
       }
 
       doDraw()
@@ -138,6 +123,7 @@ export const Main = () => {
             //console.log(audioData)
 
             audioCtx.decodeAudioData(audioData, function(buffer: any) {
+
                 source.buffer = buffer as AudioBuffer
                 source.connect(audioCtx.destination)
                 analyser.connect(audioCtx.destination)
