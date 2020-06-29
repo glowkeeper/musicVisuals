@@ -44,11 +44,6 @@ export const Main = () => {
 
     const [tempo, setTempo] = useState(0)
 
-    useEffect(() => {
-        console.log('Hello from useEffect!');
-      }, [tempo]); // <-- See the change here
-
-
     const themeClasses = themeStyles()
 
     const classes = themeStyles()
@@ -69,7 +64,7 @@ export const Main = () => {
         τ = 2 * Math.PI;
 
     const drawCanvas = (ref: any) => {
-        console.log('this is the canvas DOM element you want', ref)
+        //console.log('this is the canvas DOM element you want', ref)
         var context = ref.getContext("2d")
         //context!.globalCompositeOperation = "lighter"
         //context.lineWidth = 2
@@ -98,7 +93,7 @@ export const Main = () => {
 
       const getAudioData = (): any => {
 
-          let source = audioCtx.createBufferSource();
+          source = audioCtx.createBufferSource();
           var request = new XMLHttpRequest();
 
           request.open('GET', "./collegeCampus.wav", true)
@@ -106,14 +101,15 @@ export const Main = () => {
 
           request.onload = function() {
             var audioData = request.response;
+            //console.log(audioData)
 
             audioCtx.decodeAudioData(audioData, function(buffer: any) {
                 source.buffer = buffer as AudioBuffer
                 source.connect(audioCtx.destination)
+
                 guess(source.buffer)
                   .then(({ bpm, offset }: any) => {
                       console.log("track info: ", bpm, offset)
-                      setTempo(bpm)
                   })
                   .catch((err: any) => {
                       console.log(err)
@@ -125,11 +121,10 @@ export const Main = () => {
           }
 
           request.send()
-          return source
       }
 
     const play = () => {
-      source = getAudioData();
+      getAudioData();
       source.start(0);
     }
 
@@ -137,12 +132,13 @@ export const Main = () => {
       source.stop(0)
     }
 
+    //<p> Tempo is {tempo}</p>
+
     return (
       <>
         <canvas ref={(e) => drawCanvas(e)} width={width} height={height}></canvas>
         <button onClick={() => play()}>play!</button>
         <button onClick={() => stop()}>stop!</button>
-        <p> Tempo is {tempo}</p>
 
       </>
     )
