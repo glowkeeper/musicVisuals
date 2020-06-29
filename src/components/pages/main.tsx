@@ -16,9 +16,9 @@ export const Main = () => {
     const themeClasses = themeStyles()
 
     const classes = themeStyles()
-    const ctx = new AudioContext()
+    const audioCtx = new AudioContext()
 
-    let analyser = ctx.createAnalyser()
+    let analyser = audioCtx.createAnalyser()
     analyser.fftSize = 256
     const bufferLength = analyser.frequencyBinCount
     let dataArray = new Uint8Array(bufferLength)
@@ -28,13 +28,13 @@ export const Main = () => {
     var width = Math.max(960, innerWidth),
         height = Math.max(500, innerHeight);
 
-    var x1 = width / 2,
+    /*var x1 = width / 2,
         y1 = height / 2,
         x0 = x1,
         y0 = y1,
         i = 0,
         r = 200,
-        τ = 2 * Math.PI;
+        τ = 2 * Math.PI*/
 
     let canvasCtx: any
     let drawVisual: any
@@ -44,16 +44,10 @@ export const Main = () => {
         if ( ref !== null ) {
 
             canvasCtx = ref.getContext("2d")
-            drawVisual = requestAnimationFrame(draw);
-
-            analyser.getByteTimeDomainData(dataArray)
-
             canvasCtx.fillStyle = 'rgb(200, 200, 200)';
             canvasCtx.fillRect(0, 0, width, height);
-
             canvasCtx.lineWidth = 2;
             canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
-
             canvasCtx.beginPath();
 
         }
@@ -63,30 +57,43 @@ export const Main = () => {
 
       //console.log("here!")
 
+      var doDraw = () => {
 
-      var sliceWidth = width * 1.0 / bufferLength;
-      var x = 0;
 
-      console.log(bufferLength)
+          drawVisual = requestAnimationFrame(draw);
 
-      for(var i = 0; i < bufferLength; i++) {
+          analyser.getByteTimeDomainData(dataArray)
 
-          console.log(dataArray[i] )
+          var sliceWidth = width * 1.0 / bufferLength;
+          var x = 0;
 
-        var v = dataArray[i] / 128.0;
-        var y = v * height/2;
+          //console.log(bufferLength)
 
-        if(i === 0) {
-          canvasCtx.moveTo(x, y);
-        } else {
-          canvasCtx.lineTo(x, y);
-        }
+          for(var i = 0; i < bufferLength; i++) {
 
-        x += sliceWidth;
+            //console.log("buffer length: ", dataArray[i] )
+
+            var v = dataArray[i] / 128.0;
+            var y = v * height/2;
+
+            if(i === 0) {
+              //console.log("also I am, ", x,y)
+              canvasCtx.moveTo(x, y);
+            } else {
+              //console.log("here I am, ", x,y)
+              canvasCtx.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+          }
+
+          canvasCtx.lineTo(width, height/2);
+          canvasCtx.stroke();
+
       }
 
-      canvasCtx.lineTo(width, height/2);
-      canvasCtx.stroke();
+      doDraw()
+
     }
 
     /*const draw = (ref: any) => {
@@ -119,7 +126,7 @@ export const Main = () => {
 
       const getAudioData = (): any => {
 
-          source = ctx.createBufferSource();
+          source = audioCtx.createBufferSource();
 
           var request = new XMLHttpRequest()
 
@@ -130,15 +137,16 @@ export const Main = () => {
             var audioData = request.response;
             //console.log(audioData)
 
-            ctx.decodeAudioData(audioData, function(buffer: any) {
+            audioCtx.decodeAudioData(audioData, function(buffer: any) {
                 source.buffer = buffer as AudioBuffer
-                source.connect(ctx.destination)
-                analyser.connect(ctx.destination)
+                source.connect(audioCtx.destination)
+                analyser.connect(audioCtx.destination)
+                draw()
 
                 analyze(source.buffer)
                   .then((bpm: any) => {
                       console.log("BPM: ", bpm)
-                      setTempo(bpm)
+                      //setTempo(bpm)
                   })
                   .catch((err: any) => {
                       console.log(err)
@@ -154,7 +162,6 @@ export const Main = () => {
     const play = () => {
       getAudioData();
       source.start(0)
-      draw()
     }
 
     const stop = () => {
@@ -166,7 +173,6 @@ export const Main = () => {
     return (
       <>
         <canvas ref={(e) => drawInit(e)} width={width} height={height}></canvas>
-        <p> Tempo is {tempo}</p>
         <button onClick={() => play()}>play!</button>
         <button onClick={() => stop()}>stop!</button>
 
