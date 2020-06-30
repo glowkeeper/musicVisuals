@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-//import * as d3 from "d3"
+import { useTrail, animated } from 'react-spring'
+
+import Radio from '@material-ui/core/Radio'
+import RadioGroup from '@material-ui/core/RadioGroup'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import FormControl from '@material-ui/core/FormControl'
+import FormLabel from '@material-ui/core/FormLabel'
 
 //import { guess } from 'web-audio-beat-detector'
 import { analyze } from 'web-audio-beat-detector'
@@ -13,24 +14,26 @@ import { AudioContext, IAudioBufferSourceNode, IAudioContext} from 'standardized
 
 import { App } from '../../config/strings'
 
-import { themeStyles } from '../../styles'
+import '../../styles/app.css'
 
 const barForm = 'Bar'
 const waveForm = 'Wave'
 
 var audioSource: any
 
+const fast = { tension: 1200, friction: 40 }
+const slow = { mass: 10, tension: 200, friction: 50 }
+const trans = (x: any, y: any) => `translate3d(${x}px,${y}px,0) translate3d(-50%,-50%,0)`
+
 export const Main = () => {
 
     const [tempo, setTempo] = useState(0)
     const [freqType, setFreq] = useState(barForm)
-
-    const themeClasses = themeStyles()
+    const [trail, set] = useTrail(3, () => ({ xy: [0, 0], config: slow}))
 
     const d3CanvasCalour = 'rgb(224,255,255)'
     const freqCanvasCalour = 'rgb(200,200,200)'
 
-    const classes = themeStyles()
     const audioCtx = new AudioContext()
 
     let analyser = audioCtx.createAnalyser()
@@ -38,20 +41,14 @@ export const Main = () => {
     analyser.maxDecibels = -10
 
     const width = Math.max(960, window.innerWidth),
-        freqHeight = Math.min(200, window.innerHeight)
+        freqHeight = Math.min(200, window.innerHeight),
         d3Height = freqHeight
-
-    /*var x1 = width / 2,
-        y1 = height / 2,
-        x0 = x1,
-        y0 = y1,
-        i = 0,
-        r = 200,
-        τ = 2 * Math.PI*/
 
     let freqCanvasCtx: any
     let d3CanvasCtx: any
     let drawVisual: any
+
+
 
     const d3DrawInit = (ref: any) => {
         //console.log('this is the canvas DOM element you want', ref)
@@ -60,6 +57,8 @@ export const Main = () => {
             d3CanvasCtx = ref.getContext("2d")
             d3CanvasCtx.fillStyle = d3CanvasCalour
             d3CanvasCtx.fillRect(0, 0, width, freqHeight)
+            var path = new Path2D('M 100,100 h 50 v 50 h 50')
+            d3CanvasCtx.stroke(path)
         }
     }
 
@@ -141,42 +140,13 @@ export const Main = () => {
             avg += dataArray[i]
         }
         avg /= bufferLength
-        freqCanvasCtx.lineTo(width, freqHeight/2);
-        freqCanvasCtx.stroke();
+        freqCanvasCtx.lineTo(width, freqHeight/2)
+        freqCanvasCtx.stroke()
       }
 
       doDraw()
 
     }
-256
-
-    /*const draw = (ref: any) => {
-        //console.log('this is the canvas DOM element you want', ref)
-        var context = ref.getContext("2d")
-        //context!.globalCompositeOperation = "lighter"
-        //context.lineWidth = 2
-
-        d3.timer(function() {
-          context!.clearRect(0, 0, width, height)
-
-          var z = d3.hsl(++i % 360, 1, .5).rgb(),
-              c = "rgba(" + z.r + "," + z.g + "," + z.b + ",",
-              x = x0 += (x1 - x0) * .1,
-              y = y0 += (y1 - y0) * .1;
-
-          d3.select("#visual").transition()
-              .duration(2000)
-              .ease(Math.sqrt)
-              .tween("circle", function() {
-                return function(t: any) {
-                  context!.strokeStyle = c + (1 - t) + ")"
-                  context!.beginPath()
-                  context!.arc(x, y, r * t, 0, τ)
-                  context!.stroke()
-                }
-              })
-        })
-    }*/
 
       const getAudioData = (): any => {
 
@@ -204,7 +174,6 @@ export const Main = () => {
 
                 analyze(audioSource.buffer)
                   .then((bpm: any) => {
-                      //console.log("BPM: ", bpm)
                       setTempo(Math.round(bpm * 100) / 100)
                   })
                   .catch((err: any) => {
@@ -219,7 +188,7 @@ export const Main = () => {
       }
 
     const play = () => {
-      getAudioData();
+      getAudioData()
       audioSource.start(0)
     }
 
@@ -231,9 +200,27 @@ export const Main = () => {
         setFreq(event.target.value)
     }
 
+    //<canvas id="d3" ref={(e) => d3DrawInit(e)} width={width} height={d3Height}></canvas>
+    /*<svg style={{ position: 'absolute', width: 0, height: 0 }}>
+        <filter id="goo">
+          <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="30" />
+          <feColorMatrix in="blur" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 30 -7" />
+        </filter>
+    </svg>*/
+
     return (
       <>
-        <canvas ref={(e) => d3DrawInit(e)} width={width} height={d3Height}></canvas>
+        <canvas id="d3" ref={(e) => d3DrawInit(e)} width={width} height={d3Height}>
+            <filter id="goo">
+              <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="30" />
+              <feColorMatrix in="blur" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 30 -7" />
+            </filter>
+            <div className="hooks-main" onMouseMove={e => set({ xy: [e.clientX, e.clientY] })}>
+                {trail.map((props, index) => (
+                  <animated.div key={index} style={{ transform: props.xy.interpolate(trans) }} />
+                ))}
+            </div>
+        </canvas>
         <canvas ref={(e) => freqDrawInit(e)} width={width} height={freqHeight}></canvas>
         <FormControl component="fieldset">
           <RadioGroup name="waveform" value={freqType} onChange={barOrWave}  row>

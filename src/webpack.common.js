@@ -24,7 +24,7 @@ var config = {
     path: path.resolve(__dirname, 'build')
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".json"]
+    extensions: [".ts", ".tsx", ".js", ".json", ".css"]
   },
   plugins: [
     new webpack.ProgressPlugin(),
@@ -40,6 +40,21 @@ var config = {
   ],
   module: {
     rules: [
+        {
+            test: /\.css$/,
+            exclude: /node_modules/,
+            use: [
+               'style-loader',
+               {
+                    loader: 'css-loader',
+                    options: {
+                        importLoaders: 1,
+                        modules: { auto: true },
+                    },
+
+                },
+            ]
+        },
       {
         test: /\.js$/,
         use: ["source-map-loader"],
