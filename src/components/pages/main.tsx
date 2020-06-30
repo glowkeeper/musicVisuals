@@ -1,19 +1,34 @@
 import React, { useEffect, useState } from 'react'
+
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 //import * as d3 from "d3"
 
 //import { guess } from 'web-audio-beat-detector'
 import { analyze } from 'web-audio-beat-detector'
-import { AudioContext } from 'standardized-audio-context'
+import { AudioContext, IAudioBufferSourceNode, IAudioContext} from 'standardized-audio-context'
 
 import { App } from '../../config/strings'
 
 import { themeStyles } from '../../styles'
 
+const barForm = 'Bar'
+const waveForm = 'Wave'
+
+var audioSource: any
+
 export const Main = () => {
 
     const [tempo, setTempo] = useState(0)
+    const [freqType, setFreq] = useState(barForm)
 
     const themeClasses = themeStyles()
+
+    const d3CanvasCalour = 'rgb(224,255,255)'
+    const freqCanvasCalour = 'rgb(200,200,200)'
 
     const classes = themeStyles()
     const audioCtx = new AudioContext()
@@ -23,10 +38,8 @@ export const Main = () => {
     analyser.maxDecibels = -10
 
     const width = Math.max(960, window.innerWidth),
-        height = Math.min(200, window.innerHeight)
-
-    let source: any
-
+        freqHeight = Math.min(200, window.innerHeight)
+        d3Height = freqHeight
 
     /*var x1 = width / 2,
         y1 = height / 2,
@@ -36,17 +49,27 @@ export const Main = () => {
         r = 200,
         τ = 2 * Math.PI*/
 
-    let canvasCtx: any
+    let freqCanvasCtx: any
+    let d3CanvasCtx: any
     let drawVisual: any
 
-    const drawInit = (ref: any) => {
+    const d3DrawInit = (ref: any) => {
         //console.log('this is the canvas DOM element you want', ref)
         if ( ref !== null ) {
 
-            canvasCtx = ref.getContext("2d")
-            canvasCtx.fillStyle = 'rgb(200, 200, 200)'
-            canvasCtx.fillRect(0, 0, width, height)
+            d3CanvasCtx = ref.getContext("2d")
+            d3CanvasCtx.fillStyle = d3CanvasCalour
+            d3CanvasCtx.fillRect(0, 0, width, freqHeight)
+        }
+    }
 
+    const freqDrawInit = (ref: any) => {
+        //console.log('this is the canvas DOM element you want', ref)
+        if ( ref !== null ) {
+
+            freqCanvasCtx = ref.getContext("2d")
+            freqCanvasCtx.fillStyle = freqCanvasCalour
+            freqCanvasCtx.fillRect(0, 0, width, freqHeight)
         }
     }
 
@@ -60,8 +83,8 @@ export const Main = () => {
 
         drawVisual = requestAnimationFrame(doDraw)
         analyser.getByteFrequencyData(dataArray)
-        canvasCtx.fillStyle = 'rgb(200, 200, 200)'
-        canvasCtx.fillRect(0, 0, width, height)
+        freqCanvasCtx.fillStyle = freqCanvasCalour
+        freqCanvasCtx.fillRect(0, 0, width, freqHeight)
 
         var barWidth = (width / bufferLength) * 2.5
         var barHeight
@@ -70,8 +93,8 @@ export const Main = () => {
         for(var i = 0; i < bufferLength; i++) {
           barHeight = dataArray[i] /2
           //console.log(barHeight)
-          canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)'
-          canvasCtx.fillRect(x, height-barHeight/2, barWidth, barHeight)
+          freqCanvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
+          freqCanvasCtx.fillRect(x, freqHeight-barHeight, barWidth, barHeight)
 
           x += barWidth + 1
         }
@@ -84,7 +107,7 @@ export const Main = () => {
     const drawLine = () => {
 
       var avg = 0
-      analyser.fftSize = 2048
+      analyser.fftSize = 1024
       const bufferLength = analyser.frequencyBinCount
       let dataArray = new Uint8Array(bufferLength)
 
@@ -92,12 +115,12 @@ export const Main = () => {
 
         drawVisual = requestAnimationFrame(doDraw)
         analyser.getByteTimeDomainData(dataArray)
-        canvasCtx.fillStyle = 'rgb(200, 200, 200)'
-        canvasCtx.fillRect(0, 0, width, height)
+        freqCanvasCtx.fillStyle = freqCanvasCalour
+        freqCanvasCtx.fillRect(0, 0, width, freqHeight)
 
-        canvasCtx.lineWidth = 2
-        canvasCtx.strokeStyle = 'rgb(' + (avg+100) + ',50,50)'
-        canvasCtx.beginPath()
+        freqCanvasCtx.lineWidth = 2
+        freqCanvasCtx.strokeStyle = 'rgb(' + (avg+100) + ',50,50)'
+        freqCanvasCtx.beginPath()
 
         var sliceWidth = width * 1.0 / bufferLength;
         var x = 0
@@ -106,26 +129,26 @@ export const Main = () => {
         for(var i = 0; i < bufferLength; i++) {
 
             var v = dataArray[i] / 128.0
-            var y = v * height/2
+            var y = v * freqHeight/2
 
             if(i === 0) {
-              canvasCtx.moveTo(x, y)
+              freqCanvasCtx.moveTo(x, y)
             } else {
-              canvasCtx.lineTo(x, y)
+              freqCanvasCtx.lineTo(x, y)
             }
 
             x += sliceWidth;
             avg += dataArray[i]
         }
         avg /= bufferLength
-        canvasCtx.lineTo(width, height/2);
-        canvasCtx.stroke();
+        freqCanvasCtx.lineTo(width, freqHeight/2);
+        freqCanvasCtx.stroke();
       }
 
       doDraw()
 
     }
-
+256
 
     /*const draw = (ref: any) => {
         //console.log('this is the canvas DOM element you want', ref)
@@ -157,8 +180,7 @@ export const Main = () => {
 
       const getAudioData = (): any => {
 
-          source = audioCtx.createBufferSource();
-
+          audioSource = audioCtx.createBufferSource()
           var request = new XMLHttpRequest()
 
           request.open('GET', "./collegeCampus.wav", true)
@@ -170,15 +192,20 @@ export const Main = () => {
 
             audioCtx.decodeAudioData(audioData, function(buffer: any) {
 
-                source.buffer = buffer as AudioBuffer
-                source.connect(analyser)
+                audioSource.buffer = buffer as AudioBuffer
+                audioSource.connect(analyser)
                 analyser.connect(audioCtx.destination)
-                drawLine()
 
-                analyze(source.buffer)
+                if ( freqType === barForm) {
+                    drawBar()
+                } else {
+                    drawLine()
+                }
+
+                analyze(audioSource.buffer)
                   .then((bpm: any) => {
-                      console.log("BPM: ", bpm)
-                      //setTempo(bpm)
+                      //console.log("BPM: ", bpm)
+                      setTempo(Math.round(bpm * 100) / 100)
                   })
                   .catch((err: any) => {
                       console.log(err)
@@ -193,20 +220,31 @@ export const Main = () => {
 
     const play = () => {
       getAudioData();
-      source.start(0)
+      audioSource.start(0)
     }
 
     const stop = () => {
-      source.stop(0)
+      audioSource.stop(0)
     }
 
-    //<p> Tempo is {tempo}</p>
+    const barOrWave = (event: any) => {
+        setFreq(event.target.value)
+    }
 
     return (
       <>
-        <canvas ref={(e) => drawInit(e)} width={width} height={height}></canvas>
-        <button onClick={() => play()}>play!</button>
-        <button onClick={() => stop()}>stop!</button>
+        <canvas ref={(e) => d3DrawInit(e)} width={width} height={d3Height}></canvas>
+        <canvas ref={(e) => freqDrawInit(e)} width={width} height={freqHeight}></canvas>
+        <FormControl component="fieldset">
+          <RadioGroup name="waveform" value={freqType} onChange={barOrWave}  row>
+            <FormControlLabel value={barForm} control={<Radio />} label={barForm}/>
+            <FormControlLabel value={waveForm} control={<Radio />} label={waveForm} />
+          </RadioGroup>
+        </FormControl>
+        <br/>
+        <button onClick={() => play()}>Play</button>
+        <button onClick={() => stop()}>Stop</button>
+        <p>Tempo is {tempo}</p>
 
       </>
     )
