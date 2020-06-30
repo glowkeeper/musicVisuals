@@ -19,16 +19,14 @@ export const Main = () => {
     const audioCtx = new AudioContext()
 
     let analyser = audioCtx.createAnalyser()
-    analyser.fftSize = 256
     analyser.minDecibels = -90
     analyser.maxDecibels = -10
-    //analyser.smoothingTimeConstant = 0.85*/
-    const bufferLength = analyser.frequencyBinCount
+
+    const width = Math.max(960, window.innerWidth),
+        height = Math.min(200, window.innerHeight)
 
     let source: any
 
-    var width = Math.max(960, innerWidth),
-        height = Math.max(500, innerHeight)
 
     /*var x1 = width / 2,
         y1 = height / 2,
@@ -52,14 +50,16 @@ export const Main = () => {
         }
     }
 
-    const draw = () => {
+    const drawBar = () => {
 
+      analyser.fftSize = 256
+      const bufferLength = analyser.frequencyBinCount
       let dataArray = new Uint8Array(bufferLength)
 
       var doDraw = () => {
 
         drawVisual = requestAnimationFrame(doDraw)
-        analyser.getByteFrequencyData(dataArray)        
+        analyser.getByteFrequencyData(dataArray)
         canvasCtx.fillStyle = 'rgb(200, 200, 200)'
         canvasCtx.fillRect(0, 0, width, height)
 
@@ -80,6 +80,52 @@ export const Main = () => {
       doDraw()
 
     }
+
+    const drawLine = () => {
+
+      var avg = 0
+      analyser.fftSize = 2048
+      const bufferLength = analyser.frequencyBinCount
+      let dataArray = new Uint8Array(bufferLength)
+
+      var doDraw = () => {
+
+        drawVisual = requestAnimationFrame(doDraw)
+        analyser.getByteTimeDomainData(dataArray)
+        canvasCtx.fillStyle = 'rgb(200, 200, 200)'
+        canvasCtx.fillRect(0, 0, width, height)
+
+        canvasCtx.lineWidth = 2
+        canvasCtx.strokeStyle = 'rgb(' + (avg+100) + ',50,50)'
+        canvasCtx.beginPath()
+
+        var sliceWidth = width * 1.0 / bufferLength;
+        var x = 0
+        avg = 0
+
+        for(var i = 0; i < bufferLength; i++) {
+
+            var v = dataArray[i] / 128.0
+            var y = v * height/2
+
+            if(i === 0) {
+              canvasCtx.moveTo(x, y)
+            } else {
+              canvasCtx.lineTo(x, y)
+            }
+
+            x += sliceWidth;
+            avg += dataArray[i]
+        }
+        avg /= bufferLength
+        canvasCtx.lineTo(width, height/2);
+        canvasCtx.stroke();
+      }
+
+      doDraw()
+
+    }
+
 
     /*const draw = (ref: any) => {
         //console.log('this is the canvas DOM element you want', ref)
@@ -127,7 +173,7 @@ export const Main = () => {
                 source.buffer = buffer as AudioBuffer
                 source.connect(analyser)
                 analyser.connect(audioCtx.destination)
-                draw()
+                drawLine()
 
                 analyze(source.buffer)
                   .then((bpm: any) => {
