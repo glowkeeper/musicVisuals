@@ -57,9 +57,21 @@ export const Main = () => {
             d3CanvasCtx = ref.getContext("2d")
             d3CanvasCtx.fillStyle = d3CanvasCalour
             d3CanvasCtx.fillRect(0, 0, width, freqHeight)
-            var path = new Path2D('M 100,100 h 50 v 50 h 50')
-            d3CanvasCtx.stroke(path)
-        }
+            //var path = new Path2D('M 100,100 h 50 v 50 h 50')
+            //d3CanvasCtx.stroke(path)
+
+              var centerX = width / 2;
+              var centerY = d3Height / 2;
+              var radius = 70;
+
+              d3CanvasCtx.beginPath();
+              d3CanvasCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+              d3CanvasCtx.fillStyle = 'green';
+              d3CanvasCtx.fill();
+              d3CanvasCtx.lineWidth = 5;
+              d3CanvasCtx.strokeStyle = '#003300';
+              d3CanvasCtx.stroke();
+          }
     }
 
     const freqDrawInit = (ref: any) => {
@@ -211,11 +223,7 @@ export const Main = () => {
     return (
       <>
         <canvas id="d3" ref={(e) => d3DrawInit(e)} width={width} height={d3Height}>
-            <filter id="goo">
-              <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="30" />
-              <feColorMatrix in="blur" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 30 -7" />
-            </filter>
-            <div className="hooks-main" onMouseMove={e => set({ xy: [e.clientX, e.clientY] })}>
+            <div className="hooks-main" onMouseMove={i => set({ xy: [i.clientX, i.clientY] })}>
                 {trail.map((props, index) => (
                   <animated.div key={index} style={{ transform: props.xy.interpolate(trans) }} />
                 ))}
