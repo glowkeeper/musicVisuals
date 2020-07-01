@@ -31,7 +31,7 @@ export const Main = () => {
     const [freqType, setFreq] = useState(barForm)
     const [trail, set] = useTrail(3, () => ({ xy: [0, 0], config: slow}))
 
-    const animationCanvasColour = 'rgb(224,255,255)'
+    const animationCanvasColour = 'rgb(131,12,12)'
     const freqCanvasCalour = 'rgb(200,200,200)'
 
     const audioCtx = new AudioContext()
@@ -81,15 +81,15 @@ export const Main = () => {
 
         for(var i = 0; i < bufferLength; i++) {
 
-          radius = Math.round(dataArray[i])
+          if (dataArray[i] > 0) {
 
-          if (dataArray[i] > 10) {
+              radius =  Math.floor(Math.random() * dataArray[i]) 
 
               animationCanvasCtx.ellipse(centerX, centerY, radius * 2, radius * 8, Math.PI / 2, 0, 2 * Math.PI)
               animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
               animationCanvasCtx.fill()
               animationCanvasCtx.lineWidth = 3
-              animationCanvasCtx.strokeStyle = 'rgb(' + Math.round(dataArray[i]) + ', 50, 50)'
+              animationCanvasCtx.strokeStyle = 'rgb(' + radius + ', 50, 50)'
           }
         }
 
