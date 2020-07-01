@@ -104,11 +104,14 @@ export const Main = () => {
 
           radius = Math.round(dataArray[i])
 
-          animationCanvasCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
-          animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
-          animationCanvasCtx.fill()
-          animationCanvasCtx.lineWidth = 3
-          animationCanvasCtx.strokeStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
+          if (dataArray[i] > 10) {
+
+              animationCanvasCtx.ellipse(centerX, centerY, radius, radius, Math.PI / 4, 0, 2 * Math.PI)
+              animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
+              animationCanvasCtx.fill()
+              animationCanvasCtx.lineWidth = 3
+              animationCanvasCtx.strokeStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
+          }
 
           avg += dataArray[i]
         }
