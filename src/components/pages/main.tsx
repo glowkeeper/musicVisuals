@@ -31,7 +31,7 @@ export const Main = () => {
     const [freqType, setFreq] = useState(barForm)
     const [trail, set] = useTrail(3, () => ({ xy: [0, 0], config: slow}))
 
-    const d3CanvasCalour = 'rgb(224,255,255)'
+    const animationCanvasColour = 'rgb(224,255,255)'
     const freqCanvasCalour = 'rgb(200,200,200)'
 
     const audioCtx = new AudioContext()
@@ -41,24 +41,22 @@ export const Main = () => {
     analyser.maxDecibels = -10
 
     const width = Math.max(960, window.innerWidth),
-        freqHeight = Math.min(200, window.innerHeight),
-        d3Height = freqHeight
+        freqHeight = Math.min(200, window.innerHeight)
+    const animationHeight = 500
 
     let freqCanvasCtx: any
-    let d3CanvasCtx: any
+    let animationCanvasCtx: any
     let drawVisual: any
 
-
-
-    const d3DrawInit = (ref: any) => {
+    const animationDrawInit = (ref: any) => {
         //console.log('this is the canvas DOM element you want', ref)
         if ( ref !== null ) {
 
-            d3CanvasCtx = ref.getContext("2d")
-            d3CanvasCtx.fillStyle = d3CanvasCalour
-            d3CanvasCtx.fillRect(0, 0, width, freqHeight)
+            animationCanvasCtx = ref.getContext("2d")
+            animationCanvasCtx.fillStyle = animationCanvasColour
+            animationCanvasCtx.fillRect(0, 0, width, animationHeight)
             //var path = new Path2D('M 100,100 h 50 v 50 h 50')
-            //d3CanvasCtx.stroke(path)
+            //animationCanvasCtx.stroke(path)
         }
     }
 
@@ -74,6 +72,7 @@ export const Main = () => {
 
     const drawBar = () => {
 
+      var avg = 0
       analyser.fftSize = 256
       const bufferLength = analyser.frequencyBinCount
       let dataArray = new Uint8Array(bufferLength)
@@ -88,11 +87,12 @@ export const Main = () => {
         var barWidth = (width / bufferLength) * 2.5
         var barHeight
         var x = 0
-        var centerX = 0
-        var centerY = 0
+        var centerX = (width / 2) - Math.round(avg)
+        var centerY = (animationHeight / 2) - Math.round(avg)
         var radius = 0
+        avg = 0
 
-        d3CanvasCtx.beginPath()
+        animationCanvasCtx.beginPath()
 
         for(var i = 0; i < bufferLength; i++) {
           barHeight = dataArray[i] /2
@@ -102,18 +102,18 @@ export const Main = () => {
 
           x += barWidth + 1
 
-          centerX = Math.max(Math.round(dataArray[i]), width / 2)
-          centerY = Math.max(Math.round(dataArray[i]), d3Height / 2)
-          radius = Math.min(Math.round(dataArray[i]), 70)
+          radius = Math.round(dataArray[i])
 
-          d3CanvasCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
-          d3CanvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
-          d3CanvasCtx.fill()
-          d3CanvasCtx.lineWidth = 3
-          d3CanvasCtx.strokeStyle = '#003300'
+          animationCanvasCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
+          animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
+          animationCanvasCtx.fill()
+          animationCanvasCtx.lineWidth = 3
+          animationCanvasCtx.strokeStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
+
+          avg += dataArray[i]
         }
-
-        d3CanvasCtx.stroke();
+        avg /= bufferLength
+        animationCanvasCtx.stroke();
       }
 
       doDraw()
@@ -217,23 +217,9 @@ export const Main = () => {
         setFreq(event.target.value)
     }
 
-    //<canvas id="d3" ref={(e) => d3DrawInit(e)} width={width} height={d3Height}></canvas>
-    /*<svg style={{ position: 'absolute', width: 0, height: 0 }}>
-        <filter id="goo">
-          <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="30" />
-          <feColorMatrix in="blur" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 30 -7" />
-        </filter>
-    </svg>
-    <div className="hooks-main" onMouseMove={i => set({ xy: [i.clientX, i.clientY] })}>
-        {trail.map((props, index) => (
-          <animated.div key={index} style={{ transform: props.xy.interpolate(trans) }} />
-        ))}
-    </div>*/
-
     return (
       <>
-        <canvas id="d3" ref={(e) => d3DrawInit(e)} width={width} height={d3Height}>
-        </canvas>
+        <canvas id="animation" ref={(e) => animationDrawInit(e)} width={width} height={animationHeight}></canvas>
         <canvas ref={(e) => freqDrawInit(e)} width={width} height={freqHeight}></canvas>
         <FormControl component="fieldset">
           <RadioGroup name="waveform" value={freqType} onChange={barOrWave}  row>
