@@ -70,9 +70,34 @@ export const Main = () => {
         }
     }
 
+    const doAnimation = (dataArray: any, avg: number) => {
+
+        const bufferLength = analyser.frequencyBinCount
+        var centerX = (width / 2) - Math.round(avg)
+        var centerY = (animationHeight / 2) - Math.round(avg)
+        var radius = 0
+
+        animationCanvasCtx.beginPath()
+
+        for(var i = 0; i < bufferLength; i++) {
+
+          radius = Math.round(dataArray[i])
+
+          if (dataArray[i] > 10) {
+
+              animationCanvasCtx.ellipse(centerX, centerY, radius, radius * 8, Math.PI / 2, 0, 2 * Math.PI)
+              animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
+              animationCanvasCtx.fill()
+              animationCanvasCtx.lineWidth = 3
+              animationCanvasCtx.strokeStyle = 'rgb(' + Math.round(dataArray[i]) + ', 50, 50)'
+          }
+        }
+
+        animationCanvasCtx.stroke()
+    }
+
     const drawBar = () => {
 
-      var avg = 0
       analyser.fftSize = 256
       const bufferLength = analyser.frequencyBinCount
       let dataArray = new Uint8Array(bufferLength)
@@ -87,36 +112,21 @@ export const Main = () => {
         var barWidth = (width / bufferLength) * 2.5
         var barHeight
         var x = 0
-        var centerX = (width / 2) - Math.round(avg)
-        var centerY = (animationHeight / 2) - Math.round(avg)
-        var radius = 0
-        avg = 0
-
-        animationCanvasCtx.beginPath()
+        var avg = 0
 
         for(var i = 0; i < bufferLength; i++) {
+
           barHeight = dataArray[i] /2
           //console.log(barHeight)
           freqCanvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
           freqCanvasCtx.fillRect(x, freqHeight-barHeight, barWidth, barHeight)
 
           x += barWidth + 1
-
-          radius = Math.round(dataArray[i])
-
-          if (dataArray[i] > 10) {
-
-              animationCanvasCtx.ellipse(centerX, centerY, radius, radius, Math.PI / 4, 0, 2 * Math.PI)
-              animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
-              animationCanvasCtx.fill()
-              animationCanvasCtx.lineWidth = 3
-              animationCanvasCtx.strokeStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
-          }
-
           avg += dataArray[i]
         }
+
         avg /= bufferLength
-        animationCanvasCtx.stroke();
+        doAnimation(dataArray, avg)
       }
 
       doDraw()
@@ -126,7 +136,7 @@ export const Main = () => {
     const drawLine = () => {
 
       var avg = 0
-      analyser.fftSize = 1024
+      analyser.fftSize = 2048
       const bufferLength = analyser.frequencyBinCount
       let dataArray = new Uint8Array(bufferLength)
 
@@ -148,7 +158,7 @@ export const Main = () => {
         for(var i = 0; i < bufferLength; i++) {
 
             var v = dataArray[i] / 128.0
-            var y = v * freqHeight/2
+            var y = v * freqHeight / 2
 
             if(i === 0) {
               freqCanvasCtx.moveTo(x, y)
@@ -156,12 +166,15 @@ export const Main = () => {
               freqCanvasCtx.lineTo(x, y)
             }
 
-            x += sliceWidth;
+            x += sliceWidth
             avg += dataArray[i]
         }
-        avg /= bufferLength
+
         freqCanvasCtx.lineTo(width, freqHeight/2)
         freqCanvasCtx.stroke()
+
+        avg /= bufferLength
+        //doAnimation(dataArray, avg)
       }
 
       doDraw()
