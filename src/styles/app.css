@@ -1,8 +1,8 @@
-.hooks-main  svg {
+.hooks-main > svg {
   display: none;
 }
 
-.hooks-main  div {
+.hooks-main > div {
   position: absolute;
   will-change: transform;
   border-radius: 50%;
@@ -11,22 +11,22 @@
   opacity: 0.6;
 }
 
-.hooks-main  div:nth-child(1) {
+.hooks-main > div:nth-child(1) {
   width: 120px;
   height: 120px;
 }
 
-.hooks-main  div:nth-child(2) {
+.hooks-main > div:nth-child(2) {
   width: 250px;
   height: 250px;
 }
 
-.hooks-main  div:nth-child(3) {
+.hooks-main > div:nth-child(3) {
   width: 150px;
   height: 150px;
 }
 
-.hooks-main  div::after {
+.hooks-main > div::after {
   content: '';
   position: absolute;
   top: 20px;
@@ -37,14 +37,14 @@
   background: rgba(255, 255, 255, 0.8);
 }
 
-.hooks-main  div:nth-child(2)::after {
+.hooks-main > div:nth-child(2)::after {
   top: 70px;
   left: 70px;
   width: 70px;
   height: 70px;
 }
 
-.hooks-main  div:nth-child(3)::after {
+.hooks-main > div:nth-child(3)::after {
   top: 50px;
   left: 50px;
   width: 50px;

@@ -59,19 +59,7 @@ export const Main = () => {
             d3CanvasCtx.fillRect(0, 0, width, freqHeight)
             //var path = new Path2D('M 100,100 h 50 v 50 h 50')
             //d3CanvasCtx.stroke(path)
-
-              var centerX = width / 2;
-              var centerY = d3Height / 2;
-              var radius = 70;
-
-              d3CanvasCtx.beginPath();
-              d3CanvasCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-              d3CanvasCtx.fillStyle = 'green';
-              d3CanvasCtx.fill();
-              d3CanvasCtx.lineWidth = 5;
-              d3CanvasCtx.strokeStyle = '#003300';
-              d3CanvasCtx.stroke();
-          }
+        }
     }
 
     const freqDrawInit = (ref: any) => {
@@ -100,6 +88,11 @@ export const Main = () => {
         var barWidth = (width / bufferLength) * 2.5
         var barHeight
         var x = 0
+        var centerX = 0
+        var centerY = 0
+        var radius = 0
+
+        d3CanvasCtx.beginPath()
 
         for(var i = 0; i < bufferLength; i++) {
           barHeight = dataArray[i] /2
@@ -108,7 +101,19 @@ export const Main = () => {
           freqCanvasCtx.fillRect(x, freqHeight-barHeight, barWidth, barHeight)
 
           x += barWidth + 1
+
+          centerX = Math.round(dataArray[i])
+          centerY = Math.round(dataArray[i])
+          radius = Math.round(dataArray[i])
+
+          d3CanvasCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
+          d3CanvasCtx.fillStyle = 'green'
+          d3CanvasCtx.fill()
+          d3CanvasCtx.lineWidth = 5
+          d3CanvasCtx.strokeStyle = '#003300'
         }
+
+        d3CanvasCtx.stroke();
       }
 
       doDraw()
