@@ -1,16 +1,8 @@
 import React, { useState } from 'react'
 
-import { useTrail, animated } from 'react-spring'
-
-import Radio from '@material-ui/core/Radio'
-import RadioGroup from '@material-ui/core/RadioGroup'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import FormControl from '@material-ui/core/FormControl'
-import FormLabel from '@material-ui/core/FormLabel'
-
 //import { guess } from 'web-audio-beat-detector'
 import { analyze } from 'web-audio-beat-detector'
-import { AudioContext, IAudioBufferSourceNode, IAudioContext} from 'standardized-audio-context'
+import { AudioContext } from 'standardized-audio-context'
 
 import { App } from '../../config/strings'
 
@@ -21,15 +13,10 @@ const waveForm = 'Wave'
 
 var audioSource: any
 
-const fast = { tension: 1200, friction: 40 }
-const slow = { mass: 10, tension: 200, friction: 50 }
-const trans = (x: any, y: any) => `translate3d(${x}px,${y}px,0) translate3d(-50%,-50%,0)`
-
 export const Main = () => {
 
     const [tempo, setTempo] = useState(0)
     const [freqType, setFreq] = useState(barForm)
-    const [trail, set] = useTrail(3, () => ({ xy: [0, 0], config: slow}))
 
     const animationCanvasColour = 'rgb(131,12,12)'
     const freqCanvasCalour = 'rgb(200,200,200)'
@@ -49,19 +36,17 @@ export const Main = () => {
     let drawVisual: any
 
     const animationDrawInit = (ref: any) => {
-        //console.log('this is the canvas DOM element you want', ref)
+
         if ( ref !== null ) {
 
             animationCanvasCtx = ref.getContext("2d")
             animationCanvasCtx.fillStyle = animationCanvasColour
             animationCanvasCtx.fillRect(0, 0, width, animationHeight)
-            //var path = new Path2D('M 100,100 h 50 v 50 h 50')
-            //animationCanvasCtx.stroke(path)
         }
     }
 
     const freqDrawInit = (ref: any) => {
-        //console.log('this is the canvas DOM element you want', ref)
+
         if ( ref !== null ) {
 
             freqCanvasCtx = ref.getContext("2d")
@@ -83,7 +68,7 @@ export const Main = () => {
 
           if (dataArray[i] > 0) {
 
-              radius =  Math.floor(Math.random() * dataArray[i]) 
+              radius =  Math.floor(Math.random() * dataArray[i])
 
               animationCanvasCtx.ellipse(centerX, centerY, radius * 2, radius * 8, Math.PI / 2, 0, 2 * Math.PI)
               animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
@@ -116,8 +101,7 @@ export const Main = () => {
 
         for(var i = 0; i < bufferLength; i++) {
 
-          barHeight = dataArray[i] /2
-          //console.log(barHeight)
+          barHeight = dataArray[i] / 2
           freqCanvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
           freqCanvasCtx.fillRect(x, freqHeight-barHeight, barWidth, barHeight)
 
@@ -133,6 +117,7 @@ export const Main = () => {
 
     }
 
+    // Not called, presently, as this doesn't perfrom well alongside the animation
     const drawLine = () => {
 
       var avg = 0
@@ -151,7 +136,7 @@ export const Main = () => {
         freqCanvasCtx.strokeStyle = 'rgb(' + (avg+100) + ',50,50)'
         freqCanvasCtx.beginPath()
 
-        var sliceWidth = width * 1.0 / bufferLength;
+        var sliceWidth = width * 1.0 / bufferLength
         var x = 0
         avg = 0
 
@@ -174,7 +159,7 @@ export const Main = () => {
         freqCanvasCtx.stroke()
 
         avg /= bufferLength
-        //doAnimation(dataArray, avg)
+        doAnimation(dataArray, avg)
       }
 
       doDraw()
@@ -190,8 +175,7 @@ export const Main = () => {
           request.responseType = 'arraybuffer'
 
           request.onload = function() {
-            var audioData = request.response;
-            //console.log(audioData)
+            var audioData = request.response
 
             audioCtx.decodeAudioData(audioData, function(buffer: any) {
 
@@ -213,7 +197,7 @@ export const Main = () => {
                       console.log(err)
                   })
               },
-              function(e: any){ console.log("Error with decoding audio data" + e.err); })
+              function(e: any){ console.log("Error with decoding audio data" + e.err) })
 
           }
 
