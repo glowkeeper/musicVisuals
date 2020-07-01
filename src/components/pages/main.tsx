@@ -102,14 +102,14 @@ export const Main = () => {
 
           x += barWidth + 1
 
-          centerX = Math.round(dataArray[i])
-          centerY = Math.round(dataArray[i])
-          radius = Math.round(dataArray[i])
+          centerX = Math.max(Math.round(dataArray[i]), width / 2)
+          centerY = Math.max(Math.round(dataArray[i]), d3Height / 2)
+          radius = Math.min(Math.round(dataArray[i]), 70)
 
           d3CanvasCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
-          d3CanvasCtx.fillStyle = 'green'
+          d3CanvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ', 50, 50)'
           d3CanvasCtx.fill()
-          d3CanvasCtx.lineWidth = 5
+          d3CanvasCtx.lineWidth = 3
           d3CanvasCtx.strokeStyle = '#003300'
         }
 
@@ -223,16 +223,16 @@ export const Main = () => {
           <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="30" />
           <feColorMatrix in="blur" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 30 -7" />
         </filter>
-    </svg>*/
+    </svg>
+    <div className="hooks-main" onMouseMove={i => set({ xy: [i.clientX, i.clientY] })}>
+        {trail.map((props, index) => (
+          <animated.div key={index} style={{ transform: props.xy.interpolate(trans) }} />
+        ))}
+    </div>*/
 
     return (
       <>
         <canvas id="d3" ref={(e) => d3DrawInit(e)} width={width} height={d3Height}>
-            <div className="hooks-main" onMouseMove={i => set({ xy: [i.clientX, i.clientY] })}>
-                {trail.map((props, index) => (
-                  <animated.div key={index} style={{ transform: props.xy.interpolate(trans) }} />
-                ))}
-            </div>
         </canvas>
         <canvas ref={(e) => freqDrawInit(e)} width={width} height={freqHeight}></canvas>
         <FormControl component="fieldset">
