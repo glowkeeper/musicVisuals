@@ -74,7 +74,7 @@ export const Main = () => {
 
         const bufferLength = analyser.frequencyBinCount
         var centerX = (width / 2) - Math.round(avg)
-        var centerY = (animationHeight / 2) - Math.round(avg)
+        var centerY = animationHeight / 2
         var radius = 0
 
         animationCanvasCtx.beginPath()
@@ -85,7 +85,7 @@ export const Main = () => {
 
           if (dataArray[i] > 10) {
 
-              animationCanvasCtx.ellipse(centerX, centerY, radius, radius * 8, Math.PI / 2, 0, 2 * Math.PI)
+              animationCanvasCtx.ellipse(centerX, centerY, radius * 2, radius * 8, Math.PI / 2, 0, 2 * Math.PI)
               animationCanvasCtx.fillStyle = 'rgb(' + radius + ','  + radius + ',' + radius + ')'
               animationCanvasCtx.fill()
               animationCanvasCtx.lineWidth = 3
@@ -237,12 +237,6 @@ export const Main = () => {
       <>
         <canvas id="animation" ref={(e) => animationDrawInit(e)} width={width} height={animationHeight}></canvas>
         <canvas ref={(e) => freqDrawInit(e)} width={width} height={freqHeight}></canvas>
-        <FormControl component="fieldset">
-          <RadioGroup name="waveform" value={freqType} onChange={barOrWave}  row>
-            <FormControlLabel value={barForm} control={<Radio />} label={barForm}/>
-            <FormControlLabel value={waveForm} control={<Radio />} label={waveForm} />
-          </RadioGroup>
-        </FormControl>
         <br/>
         <button onClick={() => play()}>Play</button>
         <button onClick={() => stop()}>Stop</button>
